@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AGRO FORTE: EQUILÍBRIO TOTAL</title>
+    <style>
+        body {
+            background-color: #1a1a1a;
+            color: #ffffff;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        #game-box {
+            border: 4px solid #444;
+            background: #2a2a2a;
+            padding: 30px;
+            width: 450px;
+            text-align: center;
+            box-shadow: 0 0 20px rgba(0,255,0,0.2);
+        }
+
+        h1 { color: #00ff00; text-shadow: 2px 2px #000; margin-top: 0; }
+
+        .stat-container { margin: 20px 0; text-align: left; }
+
+        .bar-bg {
+            background: #444;
+            height: 25px;
+            width: 100%;
+            border: 2px solid #000;
+            margin-top: 5px;
+        }
+
+        .bar-fill {
+            height: 100%;
+            width: 0%;
+            transition: width 0.2s;
+        }
+
+        #prod-fill { background: #ff4444; }
+        #env-fill { background: #44ff44; }
+
+        .stats-text { display: flex; justify-content: space-between; font-weight: bold; }
+
+        #money {
+            font-size: 24px;
+            color: #fbff00;
+            margin: 20px 0;
+            background: #000;
+            padding: 10px;
+            border: 2px dashed #fbff00;
+        }
+
+        .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+
+        button {
+            padding: 15px;
+            font-weight: bold;
+            font-family: 'Courier New', Courier, monospace;
+            cursor: pointer;
+            border: 3px solid #000;
+            text-transform: uppercase;
+        }
+
+        .btn-produce { background: #cc0000; color: white; }
+        .btn-restore { background: #008800; color: white; }
+        button:hover { opacity: 0.8; }
+        button:active { transform: translateY(2px); }
+
+        #log {
+            margin-top: 20px;
+            font-size: 14px;
+            height: 40px;
+            color: #aaa;
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-box">
+    <h1>AGRO FORTE 1.0</h1>
+    
+    <div id="money">CAIXA: R$ 100.00</div>
+
+    <div class="stat-container">
+        <div class="stats-text"><span>PRODUÇÃO</span> <span id="prod-pct">10%</span></div>
+        <div class="bar-bg"><div id="prod-fill" class="bar-fill" style="width: 10%;"></div></div>
+    </div>
+
+    <div class="stat-container">
+        <div class="stats-text"><span>MEIO AMBIENTE</span> <span id="env-pct">90%</span></div>
+        <div class="bar-bg"><div id="env-fill" class="bar-fill" style="width: 90%;"></div></div>
+    </div>
+
+    <div class="controls">
+        <button class="btn-produce" onclick="acaoProduzir()">[P] PRODUZIR</button>
+        <button class="btn-restore" onclick="acaoPreservar()">[R] RECUPERAR</button>
+    </div>
+
+    <div id="log">Aperte os botões para iniciar a gestão.</div>
+</div>
+
+<script>
+    let grana = 100.00;
+    let prod = 10;
+    let amb = 90;
+    let vivo = true;
+
+    function atualizar() {
+        // Atualiza Texto
+        document.getElementById('money').innerText = `CAIXA: R$ ${grana.toFixed(2)}`;
+        document.getElementById('prod-pct').innerText = `${prod}%`;
+        document.getElementById('env-pct').innerText = `${amb}%`;
+
+        // Atualiza Barras
+        document.getElementById('prod-fill').style.width = `${prod}%`;
+        document.getElementById('env-fill').style.width = `${amb}%`;
+
+        const log = document.getElementById('log');
+
+        // Lógica de Derrota
+        if (amb <= 0) {
+            log.innerHTML = "<span style='color:red'>GAME OVER: Solo infértil. A fazenda faliu!</span>";
+            morrer();
+        } 
+        // Lógica de Vitória (Equilíbrio)
+        else if (prod >= 70 && amb >= 70) {
+            log.innerHTML = "<span style='color:#00ff00'>AGRO FORTE: Equilíbrio perfeito atingido!</span>";
+        }
+    }
+
+    function acaoProduzir() {
+        if(!vivo) return;
+        
+        prod = Math.min(100, prod + 8);
+        amb = Math.max(0, amb - 10); // Produzir desgasta a natureza
+        grana += (prod * 2.5); // Lucro baseado na produção atual
+        
+        document.getElementById('log').innerText = "Produção intensificada! +Lucro -Solo";
+        atualizar();
+    }
+
+    function acaoPreservar() {
+        if(!vivo) return;
+
+        if (grana >= 50) {
+            grana -= 50;
+            amb = Math.min(100, amb + 15);
+            prod = Math.max(5, prod - 5); // Recuperar solo exige pausa na produção agressiva
+            document.getElementById('log').innerText = "Investimento em Bio-insumos aplicado!";
+        } else {
+            document.getElementById('log').innerText = "Sem verba para preservação!";
+        }
+        atualizar();
+    }
+
+    function morrer() {
+        vivo = false;
+        document.querySelectorAll('button').forEach(b => b.style.display = 'none');
+    }
+
+    // Atalhos de teclado para ficar mais "Doom"
+    document.addEventListener('keydown', (e) => {
+        if(e.key.toLowerCase() === 'p') acaoProduzir();
+        if(e.key.toLowerCase() === 'r') acaoPreservar();
+    });
+
+</script>
+
+</body>
+</html>
